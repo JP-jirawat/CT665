@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: examination
+  labels:
+    group: example
+spec:
+  selector:
+    app: exam-app
+  ports:
+    - protocol: "TCP"
+      port: 80
+      targetPort: 3000
+    # - protocol: 'TCP'
+    #   port: 443
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exam-deployment
+  labels:
+    group: exam
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: exam-app
+      tier: examination
+
+  template:
+    metadata:
+      labels:
+        app: exam-app
+        tier: examination
+    spec:
+      containers:
+        - name: exam-app
+          image: nittapor/ct665petch #:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            periodSeconds: 10
+            initialDelaySeconds: 5
